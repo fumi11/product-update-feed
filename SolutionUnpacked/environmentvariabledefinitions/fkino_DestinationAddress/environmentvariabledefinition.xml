@@ -1,5 +1,5 @@
 <environmentvariabledefinition schemaname="fkino_DestinationAddress">
-  <defaultvalue>fumitaka.kinoshita@simpliciter11.onmicrosoft.com</defaultvalue>
+  <defaultvalue>Sample</defaultvalue>
   <displayname default="DestinationAddress">
     <label description="DestinationAddress" languagecode="1033" />
   </displayname>
