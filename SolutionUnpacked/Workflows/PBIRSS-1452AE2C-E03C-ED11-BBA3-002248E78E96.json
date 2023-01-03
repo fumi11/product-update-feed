@@ -1,0 +1,94 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_office365_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "fkino_Outlook"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      },
+      "shared_rss_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "fkino_sharedrss_751e5"
+        },
+        "api": {
+          "name": "shared_rss"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "MailAdress (noi_MailAdress)": {
+          "defaultValue": "fumitaka.kinoshita@simpliciter11.onmicrosoft.com",
+          "type": "String",
+          "metadata": {
+            "schemaName": "noi_MailAdress"
+          }
+        }
+      },
+      "triggers": {
+        "When_a_feed_item_is_published": {
+          "recurrence": {
+            "interval": 1,
+            "frequency": "Minute"
+          },
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "metadata": {
+            "operationMetadataId": "e9e5080f-56c9-43fa-8807-112983ccf33e"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_rss_1",
+              "operationId": "OnNewFeed",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_rss"
+            },
+            "parameters": {
+              "feedUrl": "https://powerbi.microsoft.com/en-us/blog/feed/",
+              "sinceProperty": "PublishDate"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Send_an_email_(V2)": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "0a04869b-8303-4992-ae05-bb71924bd926"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_office365_1",
+              "operationId": "SendEmailV2",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365"
+            },
+            "parameters": {
+              "emailMessage/To": "@parameters('MailAdress (noi_MailAdress)')",
+              "emailMessage/Subject": "PBI RSS: @{triggerOutputs()?['body/title']}",
+              "emailMessage/Body": "<p>@{triggerOutputs()?['body/primaryLink']}<br>\n<br>\n@{triggerOutputs()?['body/summary']}</p>"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      }
+    },
+    "templateName": ""
+  },
+  "schemaVersion": "1.0.0.0"
+}
